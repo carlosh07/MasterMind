@@ -3,11 +3,12 @@ import java.util.Scanner;
 
 public class MasterMind{
 	final static double MIN_BET = 2.00;
-	public static String difficulty, secretNumberString;
+	public static String difficulty, secretNumberString, guessedString;
 	public static double moneyAvailable;
-	public static boolean gameLoop = true;
+	public static boolean gameLoop = true, hasNotGuessed = true;
 	public static int numberOfGuessesPossible, guessed, numberOfDigits, incorrectGuessses, secretNumber, sum;
 	static Random random = new Random();
+	public static Scanner input = new Scanner(System.in);
 	
 	public static void messageAndExit(String message){
 		System.out.println(message);
@@ -27,7 +28,6 @@ public class MasterMind{
 	}
 	
 	public static void initialize(){
-		Scanner input = new Scanner(System.in);
 		int counter = 0;
 		String userAnswer;
 		do{
@@ -91,15 +91,46 @@ public class MasterMind{
 		}
 	}
 	
+	public static boolean digitsChecker(int numberGuessed, int numberOfDigits){
+		if(Integer.toString(numberGuessed).length() == numberOfDigits){
+			return false;
+		}
+		
+		else
+			return true;
+	}
+	
 	public static void game(){
+		//initialize should be called here??? 
 		while(gameLoop){
 			System.out.println("Guess the " +numberOfDigits + " digits number." );
+			guessed = input.nextInt();
+			while(digitsChecker(guessed, numberOfDigits)){
+				System.out.println("You must enter a " + numberOfDigits + " digit number!");
+				guessed = input.nextInt();
+			}
+			//TODO check the guesses compare to number, get the sums
+			while(hasNotGuessed){
+				if(guessed != secretNumber){
+					guess(numberToArray(guessed, numberOfDigits), numberOfDigits, numberToArray(secretNumber, numberOfDigits));
+					System.out.println("The sum of the correct digits guessed is " + sum +"! \nTry Again!");
+					guessed = input.nextInt();
+					sum =0;
+					
+				}
+				
+				else
+					hasNotGuessed = false;
+			}
 			
+			System.out.println("Congrats you have won! \nDo you want to play again?");
 		}
 	}
 	
 	public static void main(String[] args) {
 		initialize();
+		System.out.println("THE SECRET NUMBER IS " + secretNumber);
+		game();
 	}
 }
 	
