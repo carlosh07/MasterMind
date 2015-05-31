@@ -4,9 +4,9 @@ import java.util.Scanner;
 public class MasterMind{
 	final static double MIN_BET = 2.00;
 	public static String difficulty, secretNumberString, guessedString;
-	public static double moneyAvailable;
+	public static double moneyAvailable, bet;
 	public static boolean gameLoop = true, hasNotGuessed = true;
-	public static int numberOfGuessesPossible, guessed, numberOfDigits, incorrectGuessses, secretNumber, sum;
+	public static int numberOfGuessesPossible, guessed, numberOfDigits, incorrectGuessses=0, numberCorrect=0, secretNumber, sum;
 	static Random random = new Random();
 	public static Scanner input = new Scanner(System.in);
 	
@@ -71,9 +71,21 @@ public class MasterMind{
 		
 		do{
 			System.out.println("Enter the amount of money you want to bet");
-		} while(betChecker(input.nextDouble()));
+			bet = input.nextDouble();
+		} while(betChecker(bet));
 	}
 	
+	
+	public static void playAgain(){
+		System.out.println("Would you like to play again?(Yes/No)");
+		String answer = input.next();
+		if(answer.equalsIgnoreCase("YES") && moneyAvailable > 2)
+			return;
+		else if(answer.equalsIgnoreCase("yes") && moneyAvailable < 2)
+			messageAndExit("You do not have enough money to play!\nBye Felisha!");
+		else if(answer.equalsIgnoreCase("No"))
+			messageAndExit("Ok, enjoy the rest of your day!");
+	}
 	
 	public static int[] numberToArray(int numberToChange, int numberOfDigits){
 		int [] array = new int [numberOfDigits];
@@ -86,50 +98,58 @@ public class MasterMind{
 	public static void guess(int [] guess, int numDigits, int[] secretNumber){
 		for(int a = 0; a < numDigits; a++ ){
 			if(guess[a] == secretNumber[a]){
+				numberCorrect ++;
 				sum += secretNumber[a];
 			}
 		}
+		System.out.println("You got " + numberCorrect + " digits correct." 
+				+ "The sum of the correct digits guessed is " + sum +"! \nTry Again!");
+		sum =0;
+		numberCorrect = 0;
 	}
 	
-	public static boolean digitsChecker(int numberGuessed, int numberOfDigits){
-		if(Integer.toString(numberGuessed).length() == numberOfDigits){
-			return false;
+	public static void digitsChecker(int numberOfDigits){
+		while(!(Integer.toString(guessed).length() == numberOfDigits)){
+			System.out.println("You must enter a " + numberOfDigits + " digit number!");
+			guessed = input.nextInt();
 		}
-		
-		else
-			return true;
 	}
 	
 	public static void game(){
-		//initialize should be called here??? 
+		initialize();
+		System.out.println(secretNumber);
 		while(gameLoop){
 			System.out.println("Guess the " +numberOfDigits + " digits number." );
 			guessed = input.nextInt();
-			while(digitsChecker(guessed, numberOfDigits)){
-				System.out.println("You must enter a " + numberOfDigits + " digit number!");
-				guessed = input.nextInt();
-			}
+			digitsChecker(numberOfDigits);
+			
 			//TODO check the guesses compare to number, get the sums
-			while(hasNotGuessed){
+			while(hasNotGuessed && incorrectGuessses != numberOfGuessesPossible){
 				if(guessed != secretNumber){
 					guess(numberToArray(guessed, numberOfDigits), numberOfDigits, numberToArray(secretNumber, numberOfDigits));
-					System.out.println("The sum of the correct digits guessed is " + sum +"! \nTry Again!");
 					guessed = input.nextInt();
-					sum =0;
-					
+					digitsChecker(numberOfDigits);
+					incorrectGuessses++;
 				}
 				
 				else
 					hasNotGuessed = false;
 			}
 			
-			System.out.println("Congrats you have won! \nDo you want to play again?");
+			if(guessed == secretNumber){
+				System.out.println("Congrats you have won!");
+				moneyAvailable = moneyAvailable + ((bet * numberOfDigits) * (numberOfGuessesPossible 
+						- incorrectGuessses)/ numberOfGuessesPossible);
+			}
+			if(incorrectGuessses == numberOfGuessesPossible){
+				System.out.println("You have lost, you have exceeded the max tries allowed.");
+				moneyAvailable = moneyAvailable - bet;
+			}
+			playAgain();
 		}
 	}
 	
 	public static void main(String[] args) {
-		initialize();
-		System.out.println("THE SECRET NUMBER IS " + secretNumber);
 		game();
 	}
 }
