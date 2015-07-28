@@ -4,8 +4,8 @@ import java.util.Scanner;
 public class MasterMind{
 	final static double MIN_BET = 2.00;
 	public static String difficulty, secretNumberString, guessedString;
-	public static double moneyAvailable, bet;
-	public static boolean gameLoop = true, hasNotGuessed = true;
+	public static double moneyAvailable, bet, earned;
+	public static boolean gameLoop = true, hasNotGuessed = true, firstPlay =true;
 	public static int numberOfGuessesPossible, guessed, numberOfDigits, incorrectGuessses=0, numberCorrect=0, secretNumber, sum;
 	static Random random = new Random();
 	public static Scanner input = new Scanner(System.in);
@@ -28,7 +28,6 @@ public class MasterMind{
 	}
 	
 	public static void initialize(){
-		int counter = 0;
 		String userAnswer;
 		do{
 			System.out.println("Would you like to play Mastermind (yes/no)?");
@@ -43,6 +42,10 @@ public class MasterMind{
 		moneyAvailable = input.nextDouble();
 		if(moneyAvailable < 2)
 			messageAndExit("You need at least $2 to play, goodbye!");
+	}
+	
+	public static void difficulty(){
+		int counter = 0;
 		do{
 			if(counter > 0)
 				System.out.println("Not a correct difficulty.");
@@ -75,8 +78,9 @@ public class MasterMind{
 		} while(betChecker(bet));
 	}
 	
-	
 	public static void playAgain(){
+		firstPlay = false;
+		incorrectGuessses = 0;
 		System.out.println("Would you like to play again?(Yes/No)");
 		String answer = input.next();
 		if(answer.equalsIgnoreCase("YES") && moneyAvailable > 2)
@@ -116,14 +120,14 @@ public class MasterMind{
 	}
 	
 	public static void game(){
-		initialize();
-		System.out.println(secretNumber);
 		while(gameLoop){
+			if(firstPlay)
+				initialize();
+			difficulty();
+			System.out.println(secretNumber);
 			System.out.println("Guess the " +numberOfDigits + " digits number." );
 			guessed = input.nextInt();
 			digitsChecker(numberOfDigits);
-			
-			//TODO check the guesses compare to number, get the sums
 			while(hasNotGuessed && incorrectGuessses != numberOfGuessesPossible){
 				if(guessed != secretNumber){
 					guess(numberToArray(guessed, numberOfDigits), numberOfDigits, numberToArray(secretNumber, numberOfDigits));
@@ -137,13 +141,17 @@ public class MasterMind{
 			}
 			
 			if(guessed == secretNumber){
-				System.out.println("Congrats you have won!");
-				moneyAvailable = moneyAvailable + ((bet * numberOfDigits) * (numberOfGuessesPossible 
+				earned = moneyAvailable + ((bet * numberOfDigits) * (numberOfGuessesPossible 
 						- incorrectGuessses)/ numberOfGuessesPossible);
+				moneyAvailable = moneyAvailable + earned;
+				System.out.println("You won :)!!!\nYou had "+ incorrectGuessses +" incorrect tries!"
+						+ "You earned $" + earned + "\nYou now have $" + moneyAvailable + " available!");
 			}
 			if(incorrectGuessses == numberOfGuessesPossible){
 				System.out.println("You have lost, you have exceeded the max tries allowed.");
 				moneyAvailable = moneyAvailable - bet;
+				System.out.println("The number was " + secretNumber + "\nYou now have $" + moneyAvailable 
+						+ " at your dispense.");
 			}
 			playAgain();
 		}
