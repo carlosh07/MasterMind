@@ -46,6 +46,7 @@ public class MasterMind{
 	
 	public static void difficulty(){
 		int counter = 0;
+		hasNotGuessed = true;
 		do{
 			if(counter > 0)
 				System.out.println("Not a correct difficulty.");
